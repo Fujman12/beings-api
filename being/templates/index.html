@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Beings</title>
+</head>
+<body>
+<h3>Swagger - <a href="/swagger">Swagger</a> </h3>
+<ul>
+    <li>Api list - <a href="{% url 'being-list' '/' %}" >List</a></li>
+
+    <li>Atom beings list<a href="{% url 'atom-list' %}">{% url 'atom-list' %}</a></li>
+    <ul>Atom being detail
+    {% for item in beings_list %}
+        <li>{{ item.name }} - <a href="{% url 'being-detail' item.slug %}">{% url 'being-detail' item.slug %}</a></li>
+    {% endfor %}
+    </ul>
+</ul>
+</body>
+</html>
