@@ -2,7 +2,7 @@
 from __future__ import unicode_literals
 from django.db import models
 from django.core.urlresolvers import reverse
-from .utils import ping_hub
+from .utils import ping_hub, event_ping_hub
 from django.contrib.sites.shortcuts import get_current_site
 from django.conf import settings
 from being.models import Being
@@ -36,7 +36,8 @@ class BeingsListEvent(models.Model):
     def save(self, force_insert=False, force_update=False, using=None,
              update_fields=None):
         topic_url = reverse('being-list-event')
-        ping_hub('https://%s%s' % (get_current_site(settings.SITE_ID).domain, topic_url))
+        event = self.get_event()
+        event_ping_hub('https://%s%s' % (get_current_site(settings.SITE_ID).domain, topic_url), event)
         super(BeingsListEvent, self).save()
 
 
@@ -64,5 +65,6 @@ class BeingsEvent(models.Model):
 @receiver(post_save, sender=Being)
 def send_pubsub_state_mess(sender, instance, update_fields, **kwargs):
     state = instance.state
+    event = state
     query_url = '/state-query/%s' % state
-    ping_hub('https://%s%s' % (get_current_site(settings.SITE_ID).domain, query_url))
+    event_ping_hub('https://%s%s' % (get_current_site(settings.SITE_ID).domain, query_url), event)
