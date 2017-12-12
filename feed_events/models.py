@@ -55,16 +55,18 @@ class BeingsEvent(models.Model):
     def get_absolute_url(self):
         return "/being/%i/" % self.id
 
-    def save(self, force_insert=False, force_update=False, using=None,
-             update_fields=None):
-        topic_url = reverse('beings-event', kwargs={'slug': self.being.slug})
-        ping_hub('https://%s%s' % (get_current_site(settings.SITE_ID).domain, topic_url))
-        super(BeingsEvent, self).save()
-
 
 @receiver(post_save, sender=Being)
 def send_pubsub_state_mess(sender, instance, update_fields, **kwargs):
     state = instance.state
-    event = state
+    name = instance.name
+    event = name + ' change state -' + state
     query_url = '/state-query/%s' % state
     event_ping_hub('https://%s%s' % (get_current_site(settings.SITE_ID).domain, query_url), event)
+
+
+@receiver(post_save, sender=Being)
+def send_pubsub_being_state_mess(sender, instance, update_fields, **kwargs):
+    topic_url = reverse('beings-event', kwargs={'slug': instance.slug})
+    event = instance.name + ' changed state to ' + instance.state
+    event_ping_hub('https://%s%s' % (get_current_site(settings.SITE_ID).domain, topic_url), event)
